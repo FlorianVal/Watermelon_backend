@@ -1,8 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt'),
-      saltRounds = 10,
-      myPlaintextPassword = 's0/\/\P4$$w0rD',
-      someOtherPlaintextPassword = 'not_bacon';
+      saltRounds = 10;
 const app = express();
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
@@ -25,20 +23,23 @@ app.post("/users", function(req, res) {
       email = req.body.email,
       password = req.body.password,
       is_admin = 0,
-      api_key = Math.random().toString(36).substring(7);
+      api_key = Math.random().toString(36).substring(15);
   bcrypt.hash(password, saltRounds, function(err, hash) {
     let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', '${is_admin}', '${api_key} ')`;
     db.query(query, function(err, result, fields) {
       if (err) throw err;
       res.send(JSON.stringify("Success"));
     });
-    bcrypt.compare(password, hash).then(function(res) {
-      console.log(res);
   });
-  });
-
 });
 
+app.get("/users", function(req, res){
+  let query = 'SELECT * FROM users';
+  db.query(query, function(err, result, fields) {
+    if (err) throw err;
+    res.send(JSON.stringify(result));
+  });
+});
 
 app.listen(3000, function() {
   console.log('Example app listening on port 3000!');
