@@ -16,39 +16,9 @@ let db = mysql.createConnection({
   port: "8889"
 });
 
-app.post("/users", function(req, res) {
-  console.log(req.body);
-  let first_name = req.body.first_name,
-    last_name = req.body.last_name,
-    email = req.body.email,
-    password = req.body.password,
-    is_admin = 0,
-    api_key = Math.random().toString(36).substring(15);
-  bcrypt.hash(password, saltRounds, function(err, hash) {
-    let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', '${is_admin}', '${api_key} ')`;
-    db.query(query, function(err, result, fields) {
-      if (err) throw err;
-      res.send(JSON.stringify("Success"));
-    });
-  });
-});
-
-app.get("/users", function(req, res) {
-  let query = 'SELECT * FROM users';
-  db.query(query, function(err, result, fields) {
-    if (err) throw err;
-    res.send(JSON.stringify(result));
-  });
-});
-
-app.get("/users/:id", function(req, res) {
-  let id = req.params.id;
-  let query = `SELECT * FROM users WHERE id=${id}`;
-  db.query(query, function(err, result, fields) {
-    if (err) throw err;
-    res.send(JSON.stringify(result));
-  });
-});
+require('./src/users')(app, db);
+require('./src/cards')(app, db);
+require('./src/wallet')(app, db);
 
 app.listen(3000, function() {
   console.log('Example app listening on port 3000!');
