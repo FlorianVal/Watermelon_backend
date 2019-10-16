@@ -7,6 +7,9 @@ const mysql = require('mysql');
 
 // will use json for data
 app.use(bodyParser.json());
+app.use(function(req,res,next){
+  res.status(404);
+});
 
 let db = mysql.createConnection({
   host: "localhost",
@@ -19,7 +22,11 @@ let db = mysql.createConnection({
 require('./src/users')(app, db);
 require('./src/cards')(app, db);
 require('./src/wallet')(app, db);
+require('./src/payins')(app, db);
+require('./src/payouts')(app, db);
+require('./src/transfers')(app, db);
 
-app.listen(3000, function() {
-  console.log('Example app listening on port 3000!');
+
+app.listen(8000, function() {
+  console.log('Example app listening on port 8000!');
 });

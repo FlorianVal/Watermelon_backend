@@ -3,6 +3,7 @@ module.exports = function(app, db) {
   //create new user
   app.post("/v1/users", function(req, res) {
     console.log(req.body);
+    console.log("creating user...");
     let first_name = req.body.first_name,
       last_name = req.body.last_name,
       email = req.body.email,
@@ -13,7 +14,7 @@ module.exports = function(app, db) {
       let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', '${is_admin}', '${api_key} ')`;
       db.query(query, function(err, result, fields) {
         if (err) throw err;
-        res.send(JSON.stringify("Success"));
+        res.send(JSON.stringify({ "first_name" : first_name, "last_name": last_name, "email": email, "access_token": api_key}));
       });
     });
   });
@@ -52,8 +53,8 @@ module.exports = function(app, db) {
           query += " AND";
         }
         query += ` ${conditions[index]}='${req.body[conditions[index]]}'`;
-        }
       }
+    }
     query += ` WHERE id=${id}`;
     db.query(query, function(err, result, fields) {
       if (err) throw err;
@@ -61,7 +62,7 @@ module.exports = function(app, db) {
     });
   });
 
- //delete one user_id
+  //delete one user_id
   app.delete('/v1/users/:id', function(req, res) {
     let id = req.params.id;
     let query = `DELETE FROM users WHERE id=${id}`;
