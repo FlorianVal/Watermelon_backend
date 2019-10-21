@@ -5,11 +5,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 
-// will use json for data
-app.use(bodyParser.json());
-app.use(function(req,res,next){
-  res.status(404);
-});
 
 let db = mysql.createConnection({
   host: "localhost",
@@ -18,6 +13,31 @@ let db = mysql.createConnection({
   database: "Watermelon",
   port: "8889"
 });
+
+// will use json for data
+app.use(bodyParser.json());
+
+require('./src/unauth_users')(app, db);
+
+//middleware
+app.use(function(req, res, next) {
+  if ("x-auth-token" in req.headers) {
+    let token = req.headers["x-auth-token"];
+    let query = `SELECT * FROM users WHERE api_key='${token}'`;
+    db.query(query, function(err, result, fields) {
+      if (err) throw err;
+      if (result.length > 0) {
+        req.body.active_user = result[0]
+        next();
+      } else {
+        res.send("Access denied");
+      }
+    });
+  } else {
+    res.send("Access denied");
+  }
+});
+
 
 require('./src/users')(app, db);
 require('./src/cards')(app, db);

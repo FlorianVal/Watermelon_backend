@@ -1,7 +1,13 @@
 module.exports = function(app, db) {
 
+  //return all cards if admin else return card of user
   app.get('/v1/cards', function(req, res) {
-    let query = "SELECT * FROM cards"
+    if (req.body.active_user.is_admin == 1) {
+      let query = "SELECT * FROM cards"
+    }
+    else{
+      let query = `SELECT * FROM cards WHERE user_id=${req.body.active_user.id}`
+    }
     db.query(query, function(err, result, fields) {
       if (err) throw err;
       res.send(JSON.stringify(result));
@@ -12,7 +18,7 @@ module.exports = function(app, db) {
     let last_4 = req.body.last_4,
       brand = req.body.brand,
       expired_at = req.body.expired_at,
-      user_id = req.body.user_id;
+      user_id = req.body.active_user.id;
     console.log(last_4, " added to db");
     let query = `INSERT INTO cards (last_4,brand,expired_at,user_id) VALUES ('${last_4}','${brand}','${expired_at}','${user_id}')`;
     db.query(query, function(err, result, fields) {
