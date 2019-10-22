@@ -2,27 +2,33 @@ module.exports = function(app, db) {
 
   //get all users
   app.get("/v1/users", function(req, res) {
+    console.log("get users");
     let query = 'SELECT id, first_name, last_name, email, is_admin FROM users';
     db.query(query, function(err, result, fields) {
-      if (err) throw err;
+      if (err) {
+        res.status(500).send("Error")
+      };
       res.send(JSON.stringify(result));
     });
   });
 
   //get one user with id
   app.get("/v1/users/:id", function(req, res) {
+    console.log("get user by id");
+
     let id = req.params.id;
     let query = `SELECT * FROM users WHERE id=${id}`;
     db.query(query, function(err, result, fields) {
-      if (err) throw err;
+      if (err) {
+        res.status(500).send("Error")
+      };
       res.send(JSON.stringify(result));
     });
   });
 
   //update one user
-  //TODO implement api key and pass
-  //
   app.put('/v1/users/:id', function(req, res) {
+    console.log("Put user by id");
     let id = req.params.id;
     let query = "UPDATE users";
     let conditions = ["first_name", "last_name", "email", "password", "is_admin", "api_key"];
@@ -38,7 +44,9 @@ module.exports = function(app, db) {
     }
     query += ` WHERE id=${id}`;
     db.query(query, function(err, result, fields) {
-      if (err) throw err;
+      if (err) {
+        res.status(500).send("Error")
+      };
       res.send(JSON.stringify("Success"));
     });
   });
@@ -48,8 +56,10 @@ module.exports = function(app, db) {
     let id = req.params.id;
     let query = `DELETE FROM users WHERE id=${id}`;
     db.query(query, function(err, result, fields) {
-      if (err) throw err;
-      res.send(JSON.stringify("Success"));
+      if (err) {
+        res.status(500).send("Error")
+      };
+      res.status(204).send("Done");
     });
   });
 }
