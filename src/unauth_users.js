@@ -11,24 +11,54 @@ module.exports = function(app, db) {
       last_name = req.body.last_name,
       email = req.body.email,
       password = req.body.password,
-      is_admin = JSON.parse(req.body.is_admin),
-      api_key = Math.random().toString(36).substring(7);;
-
+      api_key = Math.random().toString(36).substring(7);
+    if (req.body.is_admin == undefined) {
+      is_admin = 0
+    } else {
+      is_admin = JSON.parse(req.body.is_admin)
+    }
+    if (first_name == undefined || last_name == undefined || email == undefined || password == undefined) {
+      console.log("A field is undefined while creating user");
+      res.status(401).send("Please specify all argument to create user")
+      return
+    }
     bcrypt.hash(password, saltRounds, function(err, hash) {
       let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', ${is_admin}, '${api_key} ')`;
       console.log(query);
       db.query(query, function(err, result, fields) {
+        if (err) {
+          console.log(err);
+          res.status(500).send("SQL error")
+          return
+        }
+
         let id_query = `SELECT * FROM users WHERE email="${email}"`;
-        db.query(id_query, function(errid, resultid, fields) {
-          let id = resultid[0].id;
-          res.status(200).send({
-            "id": id,
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "access_token": api_key,
-            "is_admin": is_admin
-          })
+        db.query(id_query, function(id_err, result_id, fields) {
+          if (id_err) {
+            console.log(err);
+            res.status(500).send("SQL error")
+            return
+          }
+          let id = result_id[0].id;
+
+          //create wallet
+          let wallet_query = `INSERT INTO wallets (user_id) VALUES (${id})`
+          db.query(wallet_query, function(wallet_err, wallet_res, wallet_fields) {
+            if (wallet_err) {
+              console.log(wallet_err);
+              res.status(500).send("SQL error")
+              return
+            }
+
+            res.status(200).send({
+              "id": id,
+              "first_name": first_name,
+              "last_name": last_name,
+              "email": email,
+              "access_token": api_key,
+              "is_admin": is_admin
+            });
+          });
         });
       });
     });
@@ -59,7 +89,9 @@ module.exports = function(app, db) {
               let api_query = `SELECT api_key FROM users WHERE email='${email}'`;
               db.query(api_query, function(err, result_api, fields) {
                 // wrong response serialization
-                res.status(200).send({"access_token":result_api[0].api_key});
+                res.status(200).send({
+                  "access_token": result_api[0].api_key
+                });
                 console.log(result_api[0].api_key);
               })
             } else {
