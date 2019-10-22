@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt'),
   saltRounds = 10;
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+let secretKey = fs.readFileSync('src/secret.key');
 
 module.exports = function(app, db) {
   //TODO create also wallet
@@ -12,14 +13,23 @@ module.exports = function(app, db) {
       email = req.body.email,
       password = req.body.password,
       is_admin = JSON.parse(req.body.is_admin),
-      api_key = Math.random().toString(36).substring(7);;
+      api_key = jwt.sign({ email: email}, secretKey);
 
     bcrypt.hash(password, saltRounds, function(err, hash) {
-      let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', ${is_admin}, '${api_key} ')`;
+      let query = `INSERT INTO users (first_name, last_name, email, password, is_admin, api_key) VALUES ('${first_name}', '${last_name}', '${email}', '${hash}', ${is_admin}, '${api_key}')`;
       console.log(query);
       db.query(query, function(err, result, fields) {
+        if(err){
+          console.log(err);
+          res.status(500).send("SQL Error")
+        }
         let id_query = `SELECT * FROM users WHERE email="${email}"`;
         db.query(id_query, function(errid, resultid, fields) {
+          if(err){
+            console.log(err);
+            res.status(500).send("SQL Error")
+          }
+          console.log(resultid);
           let id = resultid[0].id;
           res.status(200).send({
             "id": id,
@@ -49,7 +59,7 @@ module.exports = function(app, db) {
       console.log(email);
       db.query(pass_query, function(err, result, fields) {
         if (err) {
-          console.log("Error login 1");
+          console.log(err);
           res.status(500).send("Error")
         };
         if (result.length > 0) {
@@ -58,6 +68,10 @@ module.exports = function(app, db) {
             if (crypt_res == true) {
               let api_query = `SELECT api_key FROM users WHERE email='${email}'`;
               db.query(api_query, function(err, result_api, fields) {
+                if(err){
+                  console.log(err);
+                  res.status(500).send("SQL Error")
+                }
                 // wrong response serialization
                 res.status(200).send({"access_token":result_api[0].api_key});
                 console.log(result_api[0].api_key);
