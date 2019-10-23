@@ -41,11 +41,11 @@ module.exports = function(app, db) {
 
     //check if user is admin or user himself
     console.log(req.body.active_user.id);
-    if (req.body.active_user.is_admin == 0 && id != req.body.active_user.id) {
-      console.log("Can't edit a user without admin perms or beign the user");
-      res.status(401).send("Forbidden")
-      return
-    }
+    //if (req.body.active_user.is_admin == 0 && id != req.body.active_user.id) {
+    //  console.log("Can't edit a user without admin perms or beign the user");
+    //  res.status(401).send("Forbidden")
+    //  return
+    //}
     console.log("Put user by id");
     let query = "UPDATE users";
     let conditions = ["first_name", "last_name", "email", "password", "is_admin", "api_key"];
@@ -88,11 +88,11 @@ module.exports = function(app, db) {
   app.delete('/v1/users/:id', function(req, res) {
     let id = req.params.id;
 
-    if (req.body.active_user.is_admin == 0 && id != req.body.active_user.id) {
-      console.log("Can't edit a user without admin perms or beign the user");
-      res.status(401).send("Forbidden")
-      return
-    }
+    //if (req.body.active_user.is_admin == 0 && id != req.body.active_user.id) {
+    //  console.log("Can't edit a user without admin perms or beign the user");
+    //  res.status(401).send("Forbidden")
+    //  return
+    //}
 
 
 

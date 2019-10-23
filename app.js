@@ -38,20 +38,34 @@ app.use(function(req, res, next) {
     let query = `SELECT * FROM users WHERE api_key='${token}'`;
     db.query(query, function(err, result, fields) {
       if (err) {
+        console.log(err);
         res.status(401).send("Error")
+        return
       };
       if (result.length > 0) {
         req.body.active_user = result[0]
-        next();
+        let wallet_query = `SELECT * FROM wallets WHERE user_id=${req.body.active_user.id}`
+        db.query(wallet_query,function(err, result, fields) {
+          if (err) {
+            console.log(err);
+            res.status(401).send("Error")
+            return
+          };
+          req.body.active_user_wallet = result[0]
+          next();
+
+        })
       } else {
         console.log(result);
         console.log("Access denied no api key match");
         res.status(401).send("Access denied");
+        return
       }
     });
   } else {
     console.log("No access in headers");
     res.status(401).send("Access denied");
+    return
   }
 });
 
