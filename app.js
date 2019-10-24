@@ -14,19 +14,31 @@ let db = mysql.createConnection({
   database: "Watermelon_backend",
   port: "8889"
 });
-
+table = ["payins", "wallets", "payouts", "cards", "transfers", "users"]
+for (i in table) {
+  let empty_query = `DELETE FROM ${table[i]}`
+  db.query(empty_query, function(err, result, fields) {
+    if (err) {
+      console.log(err);
+      console.log("can't clean database");
+      return
+    }
+  })
+}
 // will use json for data
 index = 0
 
-app.use(bodyParser.urlencoded({"extended": true}));
+app.use(bodyParser.urlencoded({
+  "extended": true
+}));
 app.use(function(req, res, next) {
+  console.log("\n///////////////////////////////////");
   console.log(index);
   index += 1
   console.log(req.url);
   console.log(req.method);
   console.log(req.headers);
   console.log(req.body);
-  console.log("End of request \n");
   next()
 })
 
@@ -45,25 +57,27 @@ app.use(function(req, res, next) {
       if (result.length > 0) {
         req.body.active_user = result[0]
         let wallet_query = `SELECT * FROM wallets WHERE user_id=${req.body.active_user.id}`
-        db.query(wallet_query,function(err, result, fields) {
+        db.query(wallet_query, function(err, result, fields) {
           if (err) {
             console.log(err);
             res.status(401).send("Error")
             return
           };
           req.body.active_user_wallet = result[0]
+          console.log("Done through firewall\nActive user:");
+          console.log(req.body.active_user);
           next();
 
         })
       } else {
-        console.log(result);
+        console.log(token);
         console.log("Access denied no api key match");
         res.status(401).send("Access denied");
         return
       }
     });
   } else {
-    console.log("No access in headers");
+    console.log("No access token in headers");
     res.status(401).send("Access denied");
     return
   }

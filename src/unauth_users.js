@@ -12,14 +12,21 @@ module.exports = function(app, db) {
       email = req.body.email,
       password = req.body.password,
       api_key = Math.random().toString(36).substring(7);
+
     if (req.body.is_admin == undefined) {
       is_admin = 0
     } else {
       is_admin = JSON.parse(req.body.is_admin)
     }
+
     if (first_name == undefined || last_name == undefined || email == undefined || password == undefined) {
       console.log("A field is undefined while creating user");
       res.status(400).send("Please specify all argument to create user")
+      return
+    }
+    if(email.split("@").length == 1){
+      console.log("Wrong email");
+      res.status(400).send("Wrong email")
       return
     }
     bcrypt.hash(password, saltRounds, function(err, hash) {
@@ -28,7 +35,7 @@ module.exports = function(app, db) {
       db.query(query, function(err, result, fields) {
         if (err) {
           console.log(err);
-          res.status(500).send("SQL error")
+          res.status(400).send("SQL error")
           return
         }
 
@@ -81,8 +88,9 @@ module.exports = function(app, db) {
       if (err) {
         console.log("Error login 1");
         res.status(500).send("Error")
+        return
       };
-      
+
       if (result.length > 0) {
         bcrypt.compare(password, result[0].password).then(function(crypt_res) {
           //success
@@ -98,6 +106,7 @@ module.exports = function(app, db) {
           } else {
             console.log("no password match");
             res.status(401).send("Password do not match")
+            return
           }
         })
       } else {
