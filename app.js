@@ -14,6 +14,7 @@ let db = mysql.createConnection({
   database: "Watermelon_backend",
   port: "8889"
 });
+
 table = ["payins", "wallets", "payouts", "cards", "transfers", "users"]
 for (i in table) {
   let empty_query = `DELETE FROM ${table[i]}`
@@ -28,6 +29,13 @@ for (i in table) {
 // will use json for data
 index = 0
 
+function log_req(req) {
+  console.log(req.url);
+  console.log(req.method);
+  console.log(req.headers);
+  console.log(req.body);
+}
+
 app.use(bodyParser.urlencoded({
   "extended": true
 }));
@@ -35,10 +43,9 @@ app.use(function(req, res, next) {
   console.log("\n///////////////////////////////////");
   console.log(index);
   index += 1
-  console.log(req.url);
-  console.log(req.method);
-  console.log(req.headers);
-  console.log(req.body);
+  if (index > 0) {
+    log_req(req);
+  }
   next()
 })
 
@@ -47,7 +54,16 @@ require('./src/unauth_users')(app, db);
 app.use(function(req, res, next) {
   if ("x-auth-token" in req.headers) {
     let token = req.headers["x-auth-token"];
-    let query = `SELECT * FROM users WHERE api_key='${token}'`;
+    let secretKey = null
+    let decoded = null
+    try {
+      secretKey = fs.readFileSync('src/secret.key');
+      decoded = jwt.verify(token, secretKey);
+    } catch (e) {
+      res.status(401).send("wrong token")
+      return
+    }
+    let query = `SELECT * FROM users WHERE api_key='${decoded.user.api_key}'`;
     db.query(query, function(err, result, fields) {
       if (err) {
         console.log(err);

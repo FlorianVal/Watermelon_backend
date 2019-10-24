@@ -24,7 +24,7 @@ module.exports = function(app, db) {
       res.status(400).send("Please specify all argument to create user")
       return
     }
-    if(email.split("@").length == 1){
+    if (email.split("@").length == 1) {
       console.log("Wrong email");
       res.status(400).send("Wrong email")
       return
@@ -56,13 +56,24 @@ module.exports = function(app, db) {
               res.status(500).send("SQL error")
               return
             }
-
+            let secretKey = fs.readFileSync('src/secret.key');
+            let token = jwt.sign({
+              "user": {
+                "id": id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "api_key": api_key,
+                "is_admin": is_admin
+              },
+              "check": "check"
+            }, secretKey);
             res.status(200).send({
               "id": id,
               "first_name": first_name,
               "last_name": last_name,
               "email": email,
-              "access_token": api_key,
+              "access_token": token,
               "is_admin": is_admin
             });
           });
@@ -95,11 +106,16 @@ module.exports = function(app, db) {
         bcrypt.compare(password, result[0].password).then(function(crypt_res) {
           //success
           if (crypt_res == true) {
-            let api_query = `SELECT api_key FROM users WHERE email='${email}'`;
+            let api_query = `SELECT * FROM users WHERE email='${email}'`;
             db.query(api_query, function(err, result_api, fields) {
+              let secretKey = fs.readFileSync('src/secret.key');
+              let token = jwt.sign({
+                "user": result_api[0],
+                "check": "check"
+              }, secretKey);
               // wrong response serialization
               res.status(200).send({
-                "access_token": result_api[0].api_key
+                "access_token": token
               });
               console.log(result_api[0].api_key);
             })
