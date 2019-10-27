@@ -88,8 +88,8 @@ module.exports = function(app, db) {
       for (let index in conditions) {
         if (conditions[index] in req.body) {
           i = 1
-          if(conditions[index] == "email"){
-            if(req.body[conditions[index]].split("@").length == 1){
+          if (conditions[index] == "email") {
+            if (req.body[conditions[index]].split("@").length == 1) {
               console.log("Wrong email");
               res.status(400).send("Wrong email")
               return
@@ -172,46 +172,46 @@ module.exports = function(app, db) {
           res.status(500).send("Error")
           return
         };
-        let transfers_query = `DELETE FROM transfers WHERE debited_wallet_id=${wallet_id} OR credited_wallet_id=${wallet_id}`;
-        db.query(transfers_query, function(transfers_err, result, fields) {
-          if (transfers_err) {
-            console.log(transfers_err);
+        //let transfers_query = `DELETE FROM transfers WHERE debited_wallet_id=${wallet_id} OR credited_wallet_id=${wallet_id}`;
+        //db.query(transfers_query, function(transfers_err, result, fields) {
+        //  if (transfers_err) {
+        //    console.log(transfers_err);
+        //    res.status(500).send("Error")
+        //    return
+        //  };
+        let payouts_query = `DELETE FROM payouts WHERE wallet_id=${wallet_id}`;
+        db.query(payouts_query, function(payouts_err, result, fields) {
+          if (payouts_err) {
+            console.log(payouts_err);
             res.status(500).send("Error")
             return
           };
-          let payouts_query = `DELETE FROM payouts WHERE wallet_id=${wallet_id}`;
-          db.query(payouts_query, function(payouts_err, result, fields) {
-            if (payouts_err) {
-              console.log(payouts_err);
+          //remove wallets
+          let wallet_query = `DELETE FROM wallets WHERE user_id=${id}`;
+          db.query(wallet_query, function(wallet_err, result, fields) {
+            if (wallet_err) {
+              console.log(wallet_err);
               res.status(500).send("Error")
               return
             };
-            //remove wallets
-            let wallet_query = `DELETE FROM wallets WHERE user_id=${id}`;
-            db.query(wallet_query, function(wallet_err, result, fields) {
-              if (wallet_err) {
-                console.log(wallet_err);
+            let cards_query = `DELETE FROM cards WHERE user_id=${id}`;
+            db.query(cards_query, function(cards_err, result, fields) {
+              if (cards_err) {
+                console.log(cards_err);
                 res.status(500).send("Error")
                 return
               };
-              let cards_query = `DELETE FROM cards WHERE user_id=${id}`;
-              db.query(cards_query, function(cards_err, result, fields) {
-                if (cards_err) {
-                  console.log(cards_err);
+              let query = `DELETE FROM users WHERE id=${id}`;
+              db.query(query, function(err, result, fields) {
+                if (err) {
+                  console.log(err);
                   res.status(500).send("Error")
                   return
                 };
-                let query = `DELETE FROM users WHERE id=${id}`;
-                db.query(query, function(err, result, fields) {
-                  if (err) {
-                    console.log(err);
-                    res.status(500).send("Error")
-                    return
-                  };
-                  console.log("User deleted");
-                  res.status(204).send("Done");
+                console.log("User deleted");
+                res.status(204).send("Done");
 
-                });
+                //});
               });
             });
           });
