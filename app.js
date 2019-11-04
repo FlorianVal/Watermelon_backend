@@ -15,7 +15,7 @@ let db = mysql.createConnection({
   port: "8889"
 });
 table = ["payins", "wallets", "payouts", "cards", "transfers", "users"]
-for (i in table) {
+/*for (i in table) {
   let empty_query = `DELETE FROM ${table[i]}`
   db.query(empty_query, function(err, result, fields) {
     if (err) {
@@ -25,6 +25,7 @@ for (i in table) {
     }
   })
 }
+*/
 // will use json for data
 index = 0
 
