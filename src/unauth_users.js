@@ -71,14 +71,13 @@ module.exports = function(app, db) {
     });
   });
 
-  //get all users
   app.post("/v1/login", function(req, res) {
     let email = req.body.email,
       password = req.body.password;
 
     if (email == undefined || password == undefined) {
       console.log("A field is undefined while creating user");
-      res.status(400).send("Please specify all argument to create user")
+      res.status(400).send("Please specify all argument to log")
       return
     }
     //get hash of password
@@ -95,11 +94,13 @@ module.exports = function(app, db) {
         bcrypt.compare(password, result[0].password).then(function(crypt_res) {
           //success
           if (crypt_res == true) {
-            let api_query = `SELECT api_key FROM users WHERE email='${email}'`;
+            let api_query = `SELECT api_key, id FROM users WHERE email='${email}'`;
             db.query(api_query, function(err, result_api, fields) {
               // wrong response serialization
+              console.log(result_api);
               res.status(200).send({
-                "access_token": result_api[0].api_key
+                "access_token": result_api[0].api_key,
+                "id": result_api[0].id
               });
               console.log(result_api[0].api_key);
             })

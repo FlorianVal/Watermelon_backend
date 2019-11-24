@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt'),
   saltRounds = 10;
 const app = express();
+var cors = require('cors');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
@@ -14,7 +15,7 @@ let db = mysql.createConnection({
   database: "Watermelon_backend",
   port: "8889"
 });
-table = ["payins", "wallets", "payouts", "cards", "transfers", "users"]
+/*table = ["payins", "wallets", "payouts", "cards", "transfers", "users"]
 for (i in table) {
   let empty_query = `DELETE FROM ${table[i]}`
   db.query(empty_query, function(err, result, fields) {
@@ -24,13 +25,14 @@ for (i in table) {
       return
     }
   })
-}
+}*/
 // will use json for data
 index = 0
 
 app.use(bodyParser.urlencoded({
   "extended": true
 }));
+app.use(cors())
 app.use(function(req, res, next) {
   console.log("\n///////////////////////////////////");
   console.log(index);

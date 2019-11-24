@@ -88,7 +88,7 @@ module.exports = function(app, db) {
     //need to implement something which was disagreed by the teacher because of
     //the amazing testing program which is totaly not in agreement with the
     //project sheet and the teacher.
-    let id =req.params.id
+    let id = req.params.id
     let id_query = `SELECT id FROM wallets WHERE id = ${id}`
     db.query(id_query, function(err, result, fields) {
       if (err) {

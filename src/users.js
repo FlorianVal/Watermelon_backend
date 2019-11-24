@@ -27,10 +27,7 @@ module.exports = function(app, db) {
   //get all users
   app.get("/v1/users", function(req, res) {
     console.log("get users");
-    let query = `SELECT id, first_name, last_name, email, is_admin FROM users WHERE id=${req.body.active_user.id}`
-    if (req.body.active_user.is_admin == true) {
-      query = 'SELECT id, first_name, last_name, email, is_admin FROM users';
-    }
+      query = 'SELECT wallets.id AS wallet_id, users.id, first_name, last_name, email, is_admin FROM wallets JOIN users ON users.id = wallets.user_id'
     db.query(query, function(err, result, fields) {
       if (err) {
         console.log(err);
