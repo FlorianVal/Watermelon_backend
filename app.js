@@ -25,7 +25,8 @@ for (i in table) {
       return
     }
   })
-}*/
+}
+*/
 // will use json for data
 index = 0
 
